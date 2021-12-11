@@ -1,5 +1,4 @@
 from copy import deepcopy
-from functools import reduce
 def is_valid_surrouding(coor, map_len):
     '''
     detect if the 8 surrounding octopi are valid
@@ -79,5 +78,5 @@ def part2_solution(octopi):
 if __name__ == "__main__":
     with open('2021/day11.txt', 'r') as f:
         octopi = [[int(c) for c in row] for row in f.read().rsplit()]
-    # print(part1_solution(deepcopy(octopi)))
+    print(part1_solution(deepcopy(octopi)))
     print(part2_solution(deepcopy(octopi)))
