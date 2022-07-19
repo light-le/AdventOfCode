@@ -34,6 +34,6 @@ class AdventSession:
                                     cookies=self.cookies)
         if answer_resp.status_code == 200:
             result_html = answer_resp.text
-            return result_html[result_html.index('<main>'): result_html.index('</main>')]
+            print(result_html[result_html.index('<main>'): result_html.index('</main>')])
         else:
             raise Exception(answer_resp.text)
