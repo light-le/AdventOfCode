@@ -1,5 +1,6 @@
 from typing import Dict
 from os import path
+from functools import lru_cache
 import requests
 
 from configs import cookies
@@ -20,6 +21,7 @@ class AdventSession:
         self.cookies = cookies
         self.base_url = f'https://adventofcode.com/{year}/day/{day}'
 
+    @lru_cache(maxsize=32)
     def read_input(self) -> str:
         resp = requests.get(self.base_url + '/input',
                             cookies=self.cookies)
