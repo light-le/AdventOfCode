@@ -29,8 +29,30 @@ class AdventSession:
             return resp.text
         else:
             raise Exception(resp.text)
+    
+    def check_if_answer_can_be_submitted(self, ans: str, level: int) -> bool:
+        '''Check if there's a form input at the right level with current cookies session'''
+        question = requests.get(self.base_url, cookies=cookies)
+        if question.status_code == 200:
+            quest_html = question.text
+            if '</form>' in quest_html:
+                form_html = quest_html[quest_html.index('<form'):quest_html.index('</form>')]
+                if 'name="level" value="1"' in form_html and level != 1:
+                    print(f'Not submitting {ans} because its not for level 1')
+                    return False
+                elif 'name="level" value="2"' in form_html and level != 2:
+                    print(f'Not submitting {ans} because its not for level 2')
+                    return False
+            else:
+                print('Could not submit answer because theres no form input. Both answers may have already been submitted')
+                return False
+        else:
+            print(f'Could not access site {self.base_url}')
+            return False
 
     def post_answer(self, ans: str,  level: int=1) -> str:
+        if not self.check_if_answer_can_be_submitted(ans, level):
+            return None
         answer_resp = requests.post(self.base_url + '/answer',
                                     data={'answer': ans, 'level': level},
                                     cookies=self.cookies)
