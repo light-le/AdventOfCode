@@ -43,6 +43,7 @@ class AdventSession:
                 elif 'name="level" value="2"' in form_html and level != 2:
                     print(f'Not submitting {ans} because its not for level 2')
                     return False
+                return True
             else:
                 print('Could not submit answer because theres no form input. Both answers may have already been submitted')
                 return False
