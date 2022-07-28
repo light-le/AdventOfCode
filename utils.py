@@ -7,7 +7,7 @@ from configs import cookies
 
 def extract_year_day_from_path(pathstr: str) -> Dict:
     '''
-    >>> extract_year_day_from_path(path: '/path/to/AdvenofCode/2015/day15.py')
+    >>> extract_year_day_from_path(path: '/path/to/AdventofCode/2015/day15.py')
     {'year': 2015, 'day': 15}
     '''
     path_year, file_name = path.split(pathstr)
