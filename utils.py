@@ -17,6 +17,15 @@ def extract_year_day_from_path(pathstr: str) -> Dict:
     return {'year': int(year), 'day': day_int}
 
 class AdventSession:
+    '''
+    To get the cookies of the current session:
+    1. Go to an Advent input page, which requires login.
+    2. Right click and go to "inspect element" of developer tool, click on Network tab
+    3. Refresh the page, so "input" data would appear under name (bottom-left conner), click on that.
+    4. On the right side, click on "Cookies" tab. You'll see a table with session under Name
+    5. Copy the hash in session value column.
+    6. Setup your cookies here: cookies = {'session': <YOUR_SESSION_HASH_VALUE>}
+    '''
     def __init__(self, year: int = 2015, day: int = 1) -> None:
         self.cookies = cookies
         self.base_url = f'https://adventofcode.com/{year}/day/{day}'
