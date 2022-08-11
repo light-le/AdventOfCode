@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Callable, Dict
 from os import path
 from functools import lru_cache
 import requests
@@ -71,3 +71,25 @@ class AdventSession:
             print(result_html[result_html.index('<main>'): result_html.index('</main>')])
         else:
             raise Exception(answer_resp.text)
+        
+    def submit_result(self, level=1):
+        def innerf(solver: Callable):
+            def wrapper(*args, **kwargs):
+                result = solver(*args, **kwargs)
+                print(f'part {level} result {result}')
+                if not self.check_if_answer_can_be_submitted(result, level):
+                    return None
+                answer_resp = requests.post(self.base_url + '/answer',
+                                            data={'answer': result, 'level': level},
+                                            cookies=self.cookies)
+
+                if answer_resp.status_code == 200:
+                    result_html = answer_resp.text
+                    print(result_html[result_html.index('<main>'): result_html.index('</main>')])
+                else:
+                    raise Exception(answer_resp.text)
+                return result
+            return wrapper
+        return innerf
+        
+        
