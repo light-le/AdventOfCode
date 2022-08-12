@@ -1,4 +1,4 @@
-from typing import Callable, Dict
+from typing import Callable, Dict, List
 from os import path
 from functools import lru_cache
 import requests
@@ -39,7 +39,7 @@ class AdventSession:
         else:
             raise Exception(resp.text)
     
-    def check_if_answer_can_be_submitted(self, ans: str, level: int) -> bool:
+    def check_if_answer_can_be_submitted(self, level: int, ans: str = None) -> bool:
         '''Check if there's a form input at the right level with current cookies session'''
         question = requests.get(self.base_url, cookies=cookies)
         if question.status_code == 200:
@@ -72,13 +72,28 @@ class AdventSession:
         else:
             raise Exception(answer_resp.text)
         
-    def submit_result(self, level=1):
+    def submit_result(self, level=1, print_only=False, tests: List=None):
         def innerf(solver: Callable):
             def wrapper(*args, **kwargs):
+                if not self.check_if_answer_can_be_submitted(level):
+                    return None
+                
+                if tests:
+                    for test_input, test_output in tests:
+                        calculated_output = solver(**test_input)
+                        assert calculated_output == test_output, (f'Input: {test_input}. '
+                                                                  f'Output: {calculated_output}. '
+                                                                  f'Expected: {test_output}.')
+
                 result = solver(*args, **kwargs)
                 print(f'part {level} result {result}')
-                if not self.check_if_answer_can_be_submitted(result, level):
+                if result is None:
+                    print('You need to work on the solver function first')
                     return None
+                
+                if print_only:
+                    return None
+
                 answer_resp = requests.post(self.base_url + '/answer',
                                             data={'answer': result, 'level': level},
                                             cookies=self.cookies)
