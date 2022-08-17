@@ -84,6 +84,7 @@ class AdventSession:
                         assert calculated_output == test_output, (f'Input: {test_input}. '
                                                                   f'Output: {calculated_output}. '
                                                                   f'Expected: {test_output}.')
+                    print(f'tests passed for solver function')
 
                 result = solver(*args, **kwargs)
                 print(f'part {level} result {result}')
