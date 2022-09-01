@@ -1,6 +1,6 @@
 
 from abc import abstractmethod
-from collections import defaultdict, deque
+from collections import deque
 from enum import Enum
 from itertools import combinations
 from typing import Dict, Iterable, List, Set, Tuple
@@ -154,29 +154,6 @@ class State:
             picks.add(genchips.pop())
         return tuple(picks)
     
-    def derive_combinations2(self) -> List:
-        generators = {device for device in self.current_device if isinstance(device, Generator)}
-        microchips = {device for device in self.current_device if isinstance(device, Microchip)}
-        
-        if self.current_floor < 4:
-            upcombs = list()
-            if generators and microchips:
-                genchip_pair = self.find_generators_microchip_pairs(generators, microchips)
-                upcombs.append((Directions.UP, genchip_pair))
-                if len(generators) > len(microchips):
-                    standalone_gens = self.find_standalone_generators(generators, microchips)
-                    upcombs.append((Directions.UP, standalone_gens))
-                achip = microchips.pop()
-                upcombs.append((Directions.UP, (achip, )))
-            elif generators:
-                upcombs.append((Directions.UP, self.pick_2_or_1_from(generators)))
-            elif microchips:
-                upcombs.append((Directions.UP, self.pick_2_or_1_from(microchips)))
-        
-        # else:
-            # downcombs = 
-        return False
-        
     def derive_combinations(self) -> List:
         pair_combination = list(combinations(self.current_device, 2))
         single_combination = [(device, ) for device in self.current_device]
@@ -206,16 +183,10 @@ def solve_parts(floor_map: Dict) -> int:
     initstate = State(floor_map, 1)
     
     frontier = deque([initstate])
-    # dictier = defaultdict(deque)
-    # dictier[0].append(initstate)
-
     visited_states = {initstate}
     
     answer = None
     while frontier and answer is None:
-    # while answer is None:
-        # keys_with_values = [key for key, value in dictier.items() if len(value)>0]
-        # state = dictier[max(keys_with_values)].popleft()
         state = frontier.popleft()
         combinations = state.derive_combinations()
         for direction, combination in combinations:
@@ -226,11 +197,9 @@ def solve_parts(floor_map: Dict) -> int:
             
             if new_state and new_state not in visited_states:
                 fourth_len = len(new_state.floor_map[4])
-                # dictier[fourth_len].append(new_state)
 
                 frontier.append(new_state)
                 visited_states.add(new_state)
-                print(len(frontier), len(visited_states), fourth_len)
     return answer
 
 
