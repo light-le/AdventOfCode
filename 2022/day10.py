@@ -3,17 +3,356 @@ from utils import AdventSession, extract_year_day_from_path
 
 session = AdventSession(**extract_year_day_from_path(__file__))
 
-@session.submit_result(level=1)
-def solve_part1(inp):
-    pass
+class CathodeRayTube:
+    def __init__(self) -> None:
+        self._cycle = 0
+        self.x = 1
+        
+        self.total_signal = 0
+        self.crt = ['' for _ in range(6)]
+        
+    @property
+    def cycle(self):
+        return self._cycle
+    
+    @cycle.setter
+    def cycle(self, new_c: int):
+        self._cycle = new_c
+        if (self._cycle - 20) % 40 == 0:
+            self.total_signal += (self.x*self._cycle)
+        
+        pos = (self.cycle - 1)//40
+        hor = (self.cycle-1) % 40
+        if self.x-1 <= hor <= self.x+1:
+            self.crt[pos] += '#'
+        else:
+            self.crt[pos] += '.'
 
-@session.submit_result(level=2)
+    def parse_command(self, cmd: str):
+        self.cycle += 1
+        if cmd != 'noop':
+            add, value = cmd.split()
+            self.cycle += 1
+            self.x += int(value)
+            
+            
+    def print_crt(self):
+        for line in self.crt:
+            print(line)
+
+@session.submit_result(level=1, tests=[({'inp': [
+    'addx 15',
+    'addx -11',
+    'addx 6',
+    'addx -3',
+    'addx 5',
+    'addx -1',
+    'addx -8',
+    'addx 13',
+    'addx 4',
+    'noop',
+    'addx -1',
+    'addx 5',
+    'addx -1',
+    'addx 5',
+    'addx -1',
+    'addx 5',
+    'addx -1',
+    'addx 5',
+    'addx -1',
+    'addx -35',
+    'addx 1',
+    'addx 24',
+    'addx -19',
+    'addx 1',
+    'addx 16',
+    'addx -11',
+    'noop',
+    'noop',
+    'addx 21',
+    'addx -15',
+    'noop',
+    'noop',
+    'addx -3',
+    'addx 9',
+    'addx 1',
+    'addx -3',
+    'addx 8',
+    'addx 1',
+    'addx 5',
+    'noop',
+    'noop',
+    'noop',
+    'noop',
+    'noop',
+    'addx -36',
+    'noop',
+    'addx 1',
+    'addx 7',
+    'noop',
+    'noop',
+    'noop',
+    'addx 2',
+    'addx 6',
+    'noop',
+    'noop',
+    'noop',
+    'noop',
+    'noop',
+    'addx 1',
+    'noop',
+    'noop',
+    'addx 7',
+    'addx 1',
+    'noop',
+    'addx -13',
+    'addx 13',
+    'addx 7',
+    'noop',
+    'addx 1',
+    'addx -33',
+    'noop',
+    'noop',
+    'noop',
+    'addx 2',
+    'noop',
+    'noop',
+    'noop',
+    'addx 8',
+    'noop',
+    'addx -1',
+    'addx 2',
+    'addx 1',
+    'noop',
+    'addx 17',
+    'addx -9',
+    'addx 1',
+    'addx 1',
+    'addx -3',
+    'addx 11',
+    'noop',
+    'noop',
+    'addx 1',
+    'noop',
+    'addx 1',
+    'noop',
+    'noop',
+    'addx -13',
+    'addx -19',
+    'addx 1',
+    'addx 3',
+    'addx 26',
+    'addx -30',
+    'addx 12',
+    'addx -1',
+    'addx 3',
+    'addx 1',
+    'noop',
+    'noop',
+    'noop',
+    'addx -9',
+    'addx 18',
+    'addx 1',
+    'addx 2',
+    'noop',
+    'noop',
+    'addx 9',
+    'noop',
+    'noop',
+    'noop',
+    'addx -1',
+    'addx 2',
+    'addx -37',
+    'addx 1',
+    'addx 3',
+    'noop',
+    'addx 15',
+    'addx -21',
+    'addx 22',
+    'addx -6',
+    'addx 1',
+    'noop',
+    'addx 2',
+    'addx 1',
+    'noop',
+    'addx -10',
+    'noop',
+    'noop',
+    'addx 20',
+    'addx 1',
+    'addx 2',
+    'addx 2',
+    'addx -6',
+    'addx -11',
+    'noop',
+    'noop',
+    'noop'
+]}, 13140)])
+def solve_part1(inp):
+    tube = CathodeRayTube()
+    for cmd in inp:
+        tube.parse_command(cmd)
+    return tube.total_signal
+    
+    
+
+@session.submit_result(level=2, print_only=True, tests=[({'inp': [
+    'addx 15',
+    'addx -11',
+    'addx 6',
+    'addx -3',
+    'addx 5',
+    'addx -1',
+    'addx -8',
+    'addx 13',
+    'addx 4',
+    'noop',
+    'addx -1',
+    'addx 5',
+    'addx -1',
+    'addx 5',
+    'addx -1',
+    'addx 5',
+    'addx -1',
+    'addx 5',
+    'addx -1',
+    'addx -35',
+    'addx 1',
+    'addx 24',
+    'addx -19',
+    'addx 1',
+    'addx 16',
+    'addx -11',
+    'noop',
+    'noop',
+    'addx 21',
+    'addx -15',
+    'noop',
+    'noop',
+    'addx -3',
+    'addx 9',
+    'addx 1',
+    'addx -3',
+    'addx 8',
+    'addx 1',
+    'addx 5',
+    'noop',
+    'noop',
+    'noop',
+    'noop',
+    'noop',
+    'addx -36',
+    'noop',
+    'addx 1',
+    'addx 7',
+    'noop',
+    'noop',
+    'noop',
+    'addx 2',
+    'addx 6',
+    'noop',
+    'noop',
+    'noop',
+    'noop',
+    'noop',
+    'addx 1',
+    'noop',
+    'noop',
+    'addx 7',
+    'addx 1',
+    'noop',
+    'addx -13',
+    'addx 13',
+    'addx 7',
+    'noop',
+    'addx 1',
+    'addx -33',
+    'noop',
+    'noop',
+    'noop',
+    'addx 2',
+    'noop',
+    'noop',
+    'noop',
+    'addx 8',
+    'noop',
+    'addx -1',
+    'addx 2',
+    'addx 1',
+    'noop',
+    'addx 17',
+    'addx -9',
+    'addx 1',
+    'addx 1',
+    'addx -3',
+    'addx 11',
+    'noop',
+    'noop',
+    'addx 1',
+    'noop',
+    'addx 1',
+    'noop',
+    'noop',
+    'addx -13',
+    'addx -19',
+    'addx 1',
+    'addx 3',
+    'addx 26',
+    'addx -30',
+    'addx 12',
+    'addx -1',
+    'addx 3',
+    'addx 1',
+    'noop',
+    'noop',
+    'noop',
+    'addx -9',
+    'addx 18',
+    'addx 1',
+    'addx 2',
+    'noop',
+    'noop',
+    'addx 9',
+    'noop',
+    'noop',
+    'noop',
+    'addx -1',
+    'addx 2',
+    'addx -37',
+    'addx 1',
+    'addx 3',
+    'noop',
+    'addx 15',
+    'addx -21',
+    'addx 22',
+    'addx -6',
+    'addx 1',
+    'noop',
+    'addx 2',
+    'addx 1',
+    'noop',
+    'addx -10',
+    'noop',
+    'noop',
+    'addx 20',
+    'addx 1',
+    'addx 2',
+    'addx 2',
+    'addx -6',
+    'addx -11',
+    'noop',
+    'noop',
+    'noop'
+]}, None)])
 def solve_part2(inp):
-    pass
+    tube = CathodeRayTube()
+    for cmd in inp:
+        tube.parse_command(cmd)
+    tube.print_crt()
 
 
 if __name__ == '__main__':
-    inp = session.read_input().split('\n')
+    inp = session.read_input().split('\n')[:-1]
     
     solve_part1(inp)
     
