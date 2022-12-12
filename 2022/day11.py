@@ -95,8 +95,6 @@ class Monkey:
 def solve(monkeys: List[Monkey], rounds:int = 20, part1: bool=True) -> int:
     
     for round in range(rounds):
-        if set(str(round)[1:]) == {'0'}:
-            print(round)
         m = 0
         while m < len(monkeys):
             while monkeys[m].items:
