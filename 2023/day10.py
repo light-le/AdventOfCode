@@ -13,7 +13,7 @@ def solve_part2(inp):
 
 
 if __name__ == '__main__':
-    inp = session.read_input().split('\n')[:-1]ß
+    inp = session.read_input().split('\n')[:-1]
     
     solve_part1(inp)
     
