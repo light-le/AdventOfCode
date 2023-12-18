@@ -1,6 +1,7 @@
 from typing import Callable, Dict, List
 from os import path
 from functools import lru_cache
+from datetime import datetime
 import requests
 
 from configs import cookies
@@ -72,7 +73,8 @@ class AdventSession:
         else:
             raise Exception(answer_resp.text)
         
-    def submit_result(self, level=1, print_only=False, tests: List=None):
+    def submit_result(self, level=1, print_only=False, tests: List=None, wrong_answers: set=None):
+        wrong_answers = wrong_answers or set()
         def innerf(solver: Callable):
             def wrapper(*args, **kwargs):
                 if not self.check_if_answer_can_be_submitted(level):
@@ -86,10 +88,16 @@ class AdventSession:
                                                                   f'Expected: {test_output}.')
                     print(f'tests passed for solver function')
 
+                start_time = datetime.now()
                 result = solver(*args, **kwargs)
                 print(f'part {level} result {result}')
+                print(f'Solver function completed in {(datetime.now() - start_time).seconds} secs.')
                 if result is None:
                     print('You need to work on the solver function first')
+                    return None
+                
+                if wrong_answers and result in wrong_answers:
+                    print(f'Not submitting {result} because it was one of the wrong answers {wrong_answers}')
                     return None
                 
                 if print_only:
