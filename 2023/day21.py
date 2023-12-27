@@ -1,7 +1,10 @@
+from collections import namedtuple
+import numpy as np
 from functools import cache
 from utils import AdventSession, extract_year_day_from_path
 
 session = AdventSession(**extract_year_day_from_path(__file__))
+Point = namedtuple('Point', ['row', 'col'])
 
 @cache
 def find_surrounding_step_pos(mapt: tuple[tuple[str]], step_pos: tuple[int, int]) -> set[tuple[int, int]]:
@@ -90,6 +93,28 @@ def step_to_pos2(steps, srow, scol, mapt) -> dict:
         step_pos_dict[step+1] = len(current_step_pos)
     return step_pos_dict
 
+def find_surrounding_steps(p: Point, mapd: dict, n: int, history: set=None) -> set[Point]:
+    history = history or set()
+    next_steps = set()
+    
+    surrounding_points = [
+        Point(p.row-1, p.col), # upper
+        Point(p.row+1, p.col), # lower
+        Point(p.row, p.col-1), # left
+        Point(p.row, p.col+1), # right
+    ]
+
+    for point in surrounding_points:
+        if mapd[Point(point.row % n, point.col % n)] == '.':
+            next_steps.add(point)
+        
+    return next_steps - history
+    
+def derive_spots_from_steps(s: int, mat_x: np.array) -> int:
+    mat_s = [s**2, s, 1]
+    lix = [round(s[0]) for s in list(mat_x)]
+    return sum([a*b for a,b in zip(mat_s, lix)])
+
 @session.submit_result(level=2, tests=[({'mapstr': [
     '...........',
     '.....###.#.',
@@ -102,7 +127,7 @@ def step_to_pos2(steps, srow, scol, mapt) -> dict:
     '.##.#.####.',
     '.##..##.##.',
     '...........'
-], 'steps': 6}, 16), ({'mapstr': [
+], 'nsteps': 500}, 167004), ({'mapstr': [
     '...........',
     '.....###.#.',
     '.###.##..#.',
@@ -114,7 +139,7 @@ def step_to_pos2(steps, srow, scol, mapt) -> dict:
     '.##.#.####.',
     '.##..##.##.',
     '...........'
-], 'steps': 100}, 6536), ({'mapstr': [
+], 'nsteps': 1000}, 668697), ({'mapstr': [
     '...........',
     '.....###.#.',
     '.###.##..#.',
@@ -126,20 +151,97 @@ def step_to_pos2(steps, srow, scol, mapt) -> dict:
     '.##.#.####.',
     '.##..##.##.',
     '...........'
-], 'steps': 5000}, 16733044)])
-def solve_part2(mapstr: list[str], steps: int):
+], 'nsteps': 5000}, 16733044)], print_only=True)
+def solve_part2(mapstr: list[str], nsteps: int=26501365):
     mapl = [list(row) for row in mapstr]
     srow, *_ = [r for r, row in enumerate(mapl) if 'S' in row]
     scol = mapl[srow].index('S')
     
     mapl[srow][scol] = '.'
-    mapt = tuple([tuple(row) for row in mapl])
+    mapd = dict()
+    for r, row in enumerate(mapl):
+        for c, char in enumerate(row):
+            mapd[Point(r, c)] = char
     
-    step_pos = step_to_pos(66, srow, scol, mapt)
+    spoint = Point(srow, scol)
+
+    history = {
+        0: set(), # even steps
+        1: set(), # odd steps
+    }
     
-    print(step_pos)
+    nrows = len(mapl)
+    ncols = len(mapl[0])
+    assert nrows == ncols
+    
+    outer_points = {spoint}
+    
+    spots_by_steps = dict()
+    correct_count = 0
+    
+    for steps in range(1, 10*2*ncols):
+        history[(steps-1)%2] |= outer_points
+        new_points = set()
+        for opoint in outer_points:
+            next_steps = find_surrounding_steps(opoint, mapd, n=ncols, history=history[steps%2])
+            new_points |= next_steps
+        
+        outer_points = new_points
+        
+        if steps >= 10*ncols:
+            predicted_outers = spots_by_steps[steps-2*ncols][0] + (spots_by_steps[steps-2*ncols][0] - spots_by_steps[steps-2*2*ncols][0])
+            if predicted_outers == len(outer_points):
+                correct_count += 1
+            else:
+                correct_count = 0
+        
+        spots_by_steps[steps] = (len(outer_points), len(history[steps%2]), len(outer_points) + len(history[steps%2]))
+        
+        if correct_count >= 2*2*ncols:
+            print(f'Thesis validated at steps {steps}. Breaking out')
+            break
+        
+        if steps % 100 == 0:
+            print(steps, correct_count)
+    
+    remainder_steps = nsteps % (2*ncols)
+    final_steps = steps - (2*ncols) - (((steps - 2*ncols) % (2*ncols)) - remainder_steps)
+    assert final_steps % (2*ncols) == remainder_steps
+    assert final_steps <= steps
+    
+    # ax**2 + bx + c = s where x is steps/blocks and s is the number of spots. We're solving system of 3 
+    # equations and 3 coefficients variables
+    
+    unknowns = list()
+    total_spots = list()
+    for _ in range(3):
+        unknowns.append([final_steps**2, final_steps, 1])
+        total_spots.append([spots_by_steps[final_steps][2]])
+        
+        final_steps -= (2*ncols)
+    
+    # arrange y = Ax where x is vector a b c 
+    mat_a = np.array(unknowns)
 
+    y = np.array(total_spots)
+    print(mat_a, total_spots)
 
+    mat_ainv = np.linalg.inv(mat_a)
+    x = np.dot(mat_ainv, y)
+    print('matx', x)
+    test_steps = final_steps - 2*ncols
+    
+    for i in range(3):
+        if test_steps < 2*ncols:
+            break
+        predicted = derive_spots_from_steps(test_steps, x)
+        actual = spots_by_steps[test_steps][2]
+        assert predicted == actual, \
+            f'not correct at {i}th test steps {test_steps}, predited {predicted} while actual {actual}'
+        test_steps -= 2*ncols
+
+    return derive_spots_from_steps(nsteps, x)
+    
 if __name__ == '__main__':
     inp = session.read_input().split('\n')[:-1]
     
