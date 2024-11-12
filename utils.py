@@ -77,7 +77,7 @@ class AdventSession:
         wrong_answers = wrong_answers or set()
         def innerf(solver: Callable):
             def wrapper(*args, **kwargs):
-                if not self.check_if_answer_can_be_submitted(level):
+                if not print_only and not self.check_if_answer_can_be_submitted(level):
                     return None
                 
                 if tests:
